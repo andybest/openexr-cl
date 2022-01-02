@@ -1,8 +1,8 @@
-(defpackage openexr-cl/tests/main
+(defpackage openexr/tests/main
   (:use :cl
-        :openexr-cl
+        :openexr
         :rove))
-(in-package :openexr-cl/tests/main)
+(in-package :openexr/tests/main)
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :openexr-cl)' in your Lisp.
 
