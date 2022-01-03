@@ -27,6 +27,26 @@
            (ysampling 0 :type (signed-byte 32)))
 
 
+(defun read-null-terminated-array (type stream)
+  "Reads an array of TYPE terminated with a null byte (#x0). Returns the array and number of bytes read"
+  (let ((type-array (make-array 0))
+        (bytes-read 0))
+    (loop
+      (let ((start-position (file-position stream)))
+        (if (= (read-byte stream) #x0)
+                                        ; If it's a null byte, return
+            (return (values type-array (+ bytes-read 1)))
+                                        ; Otherwise, rewind the stream and read TYPE from it
+            (progn
+              (file-position stream start-position)
+              (let ((result (read-binary type stream)))
+                (setf bytes-read (+ bytes-read (- (file-position stream) start-position)))
+                (vector-push-extend result type-array))))))))
+
+
+;; chlist compression box2i lineOrder float v2f
+
+
 ;; (defbinary openexr-header-attribute (:export t :byte-order :little-endian)
 ;;   (name "" :type (terminated-string 1 :terminator 0))
 ;;   (attribute-type "" :type (terminated-string 1 :terminator 0))
@@ -36,24 +56,3 @@
 ;;                     ("box2i" 'box2i)
 ;;                     ("box2f" 'box2f)
 ;;                     ("chlist" '())))))
-
-
-(define-lisp-binary-type type-info (counted-array count-size element-type &key bind-index-to)
-  :where (eq counted-array 'counted-array)
-  (let ((count-size* (gensym "COUNT-SIZE-")))
-    	(reader-value  (gensym "READER-VALUE-"))
-    	(reader-byte-count (gensym "READER-BYTE-COUNT-")
-        (letf (((slot-value type-info 'type))))
-    	    `(simple-array ,element-type ((read-integer ,count-size* ,stream-symbol :byte-order ,byte-order))
-           ,@(if bind-index-to)
-           `(:bind-index-to ,bind-index-to
-                (multiple-value-bind (defstruct-type reader writer))))
-    	  (expand-defbinary-type-field type-info))
-    	(setf writer `(let ((,count-size* ,count-size)))
-              			(+)
-               (write-integer (length ,name) ,count-size* ,stream-symbol :byte-order ,byte-order)
-               ,writer)
-    	(setf reader `(let ((,count-size* ,count-size)))
-              			(multiple-value-bind (,reader-value ,reader-byte-count) ,reader)
-                (values ,reader-value (+ ,count-size* ,reader-byte-count)))
-    	(values (getf defstruct-type :type) reader writer)))
