@@ -14,8 +14,9 @@
 (defsystem "openexr/tests"
   :author ""
   :license ""
-  :depends-on ("openexr"
-               "rove")
+  :depends-on (openexr
+               :flexi-streams
+               :rove)
   :components ((:module "tests"
                 :components
                 ((:file "main")
