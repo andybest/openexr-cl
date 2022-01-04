@@ -6,6 +6,7 @@
   :components ((:module "src"
                 :components
                 ((:file "package")
+                 (:file "utils")
                  (:file "attributes")
                  (:file "main"))))
   :description ""
@@ -14,7 +15,7 @@
 (defsystem "openexr/tests"
   :author ""
   :license ""
-  :depends-on (openexr
+  :depends-on (:openexr
                :flexi-streams
                :rove)
   :components ((:module "tests"
