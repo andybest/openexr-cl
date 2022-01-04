@@ -24,6 +24,6 @@ jobs:
       - uses: 40ants/setup-lisp@v1
         with:
           asdf-system: openexr
-      - uses: 40ants/run-tests@v2-beta
+      - uses: 40ants/run-tests@v2
         with:
           asdf-system: openexr
