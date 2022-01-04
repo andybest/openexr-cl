@@ -29,7 +29,7 @@
 
 (defun read-null-terminated-array (type stream)
   "Reads an array of TYPE terminated with a null byte (#x0). Returns the array and number of bytes read"
-  (let ((type-array (make-array 0))
+  (let ((type-array (make-array 0 :adjustable t :fill-pointer 0))
         (bytes-read 0))
     (loop
       (let ((start-position (file-position stream)))
