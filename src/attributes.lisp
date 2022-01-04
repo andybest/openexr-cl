@@ -13,6 +13,14 @@
            (xmax 0 :type single-float)
            (ymax 0 :type single-float))
 
+(defbinary v2i (:export t :byte-order :little-endian)
+           (x 0 :type (signed-byte 32))
+           (y 0 :type (signed-byte 32)))
+
+(defbinary v2f (:export t :byte-order :little-endian)
+           (x 0 :type single-float)
+           (y 0 :type single-float))
+
 (define-enum channel-pixel-type 4 (:byte-order :little-endian)
     :uint
     :half
@@ -26,33 +34,62 @@
            (xsampling 0 :type (signed-byte 32))
            (ysampling 0 :type (signed-byte 32)))
 
+(define-enum compression-type 1 (:byte-order :little-endian)
+             :no-compression
+             :rle-compression
+             :zips-compression
+             :zip-compression
+             :piz-compression
+             :pxr24-compression
+             :b44-compression
+             :b44a-compression)
 
-(defun read-null-terminated-array (type stream)
-  "Reads an array of TYPE terminated with a null byte (#x0). Returns the array and number of bytes read"
-  (let ((type-array (make-array 0 :adjustable t :fill-pointer 0))
-        (bytes-read 0))
-    (loop
-      (let ((start-position (file-position stream)))
-        (if (= (read-byte stream) #x0)
-                                        ; If it's a null byte, return
-            (return (values type-array (+ bytes-read 1)))
-                                        ; Otherwise, rewind the stream and read TYPE from it
-            (progn
-              (file-position stream start-position)
-              (let ((result (read-binary type stream)))
-                (setf bytes-read (+ bytes-read (- (file-position stream) start-position)))
-                (vector-push-extend result type-array))))))))
+(define-enum line-order 1 (:byte-order :little-endian)
+             :increasing-y
+             :decreasing-y
+             :random-y)
 
 
-;; chlist compression box2i lineOrder float v2f
+(defbinary openexr-header-attribute (:export t :byte-order :little-endian)
+           (name "" :type (terminated-string 1 :terminator 0))
+           (attribute-type "" :type (terminated-string 1 :terminator 0))
+           (size 0 :type (signed-byte 32))
+           (value 0 :type (eval
+                           (case attribute-type
+                             ("int" '(signed-byte 32))
+                             ("float" 'single-float)
+                             ("double" 'double-float)
+                             ("box2i" 'box2i)
+                             ("box2f" 'box2f)
+                             ("v2i" 'v2i)
+                             ("v2f" 'v2f)
+                             ("chlist" '(custom
+                                         :reader (lambda (stream)
+                                                   (multiple-value-bind (stream read-size)
+                                                       (read-null-terminated-array 'channel-layout stream)
+                                                     (setf size read-size)
+                                                     (values stream read-size)))
+                                         :writer (lambda (obj stream)
+                                                   (write-null-terminated-array obj 'channel-layout stream))))
+                             ("compression" 'compression-type)
+                             ("lineOrder" 'line-order)
+                                        ; Fall back to just grabbing the data as a byte array
+                             (otherwise `(simple-array (unsigned-byte 8) (,size)))))))
 
+(defun find-attribute-with-name (name attributes)
+  "Search ATTRIBUTES for one with provided NAME. Returns nil if no match"
+  (loop for attr across attributes do
+        (when (string= (openexr-header-attribute-name attr) name)
+          (return attr)))
+  nil)
 
-;; (defbinary openexr-header-attribute (:export t :byte-order :little-endian)
-;;   (name "" :type (terminated-string 1 :terminator 0))
-;;   (attribute-type "" :type (terminated-string 1 :terminator 0))
-;;   (size 0 :type (signed-byte 32))
-;;   (value 0 :type (eval
-;;                   (case attribute-type
-;;                     ("box2i" 'box2i)
-;;                     ("box2f" 'box2f)
-;;                     ("chlist" '())))))
+(defun find-data-window (attributes)
+  "Searches ATTRIBUTES for the data window"
+  (find-attribute-with-name "dataWindow" attributes))
+
+(defun get-number-of-lines (attributes)
+  "Finds the 'dataWindow' attribute and returns the number of lines"
+  (let ((result (find-data-window attributes)))
+    (when (null result)
+      (error "OpenEXR file does not contain a data window"))
+    (- (box2i-ymax result) (box2i-ymin result))))

@@ -1,7 +1,5 @@
 (in-package :openexr)
 
-;; (defbinary openexr-header (export t :byte-order :little-endian))
-
 
 (defbinary openexr-file (:export t :byte-order :little-endian)
   (magic 20000630 :type (magic :actual-type (signed-byte 32) :value 20000630))
@@ -14,4 +12,9 @@
                                                                                     (unsigned-byte 1)
                                                                                     (unsigned-byte 1)
                                                                                     (unsigned-byte 1)
-                                                                                    (unsigned-byte 20)))))
+                                                                                    (unsigned-byte 20)))
+   (header nil :type (custom :reader (lambda (stream)
+                                       (read-null-terminated-array 'openexr-header-attribute stream))
+                             :writer (lambda (obj stream)
+                                       (write-null-terminated-array obj 'openexr-header-attribute stream))))
+   (chunk-offset-table 0 :type (unsigned-byte 32))))
