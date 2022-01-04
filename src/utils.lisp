@@ -15,3 +15,11 @@
               (let ((result (read-binary type stream)))
                 (setf bytes-read (+ bytes-read (- (file-position stream) start-position)))
                 (vector-push-extend result type-array))))))))
+
+(defun write-null-terminated-array (objects type stream)
+  "Writes array OBJECTS of TYPE to STREAM terminated with a null byte (#x0). Returns the number of bytes written."
+  (let ((start (file-position stream)))
+    (loop for elem across objects do
+          (write-binary-type elem type stream))
+    (write-byte #x00 stream)
+    (+ (file-position stream) start)))
