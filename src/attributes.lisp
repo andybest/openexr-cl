@@ -8,18 +8,18 @@
            (ymax 0 :type (signed-byte 32)))
 
 (defbinary box2f (:export t :byte-order :little-endian)
-           (xmin 0 :type single-float)
-           (ymin 0 :type single-float)
-           (xmax 0 :type single-float)
-           (ymax 0 :type single-float))
+           (xmin 0.0 :type single-float)
+           (ymin 0.0 :type single-float)
+           (xmax 0.0 :type single-float)
+           (ymax 0.0 :type single-float))
 
 (defbinary v2i (:export t :byte-order :little-endian)
            (x 0 :type (signed-byte 32))
            (y 0 :type (signed-byte 32)))
 
 (defbinary v2f (:export t :byte-order :little-endian)
-           (x 0 :type single-float)
-           (y 0 :type single-float))
+           (x 0.0 :type single-float)
+           (y 0.0 :type single-float))
 
 (define-enum channel-pixel-type 4 (:byte-order :little-endian)
     :uint

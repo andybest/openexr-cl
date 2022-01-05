@@ -1,5 +1,5 @@
 (defpackage openexr/tests/helpers
-  (:use :cl)
+  (:use :cl :lisp-binary)
   (:export :get-test-file-path
            :files-match-p))
 (in-package :openexr/tests/helpers)
