@@ -1,20 +1,11 @@
 (defpackage openexr/tests/utils
   (:use :cl
+        :openexr/tests/helpers
         :lisp-binary
         :openexr.utils
         :rove))
 (in-package :openexr/tests/utils)
 
-
-(defun get-test-file-path (filename)
-  (merge-pathnames (merge-pathnames filename #P"test-input/")
-                   (asdf:system-source-directory :openexr/tests)))
-
-(defun files-match-p (path1 path2)
-  "If the contents of the files at PATH1 and PATH2 are the same, returns t"
-  (let ((file1 (read-file path1))
-        (file2 (read-file path2)))
-       (equalp file1 file2)))
 
 ;; A simple binary containing only a 32 bit integer
 (defbinary int-test-binary (:byte-order :little-endian)
@@ -46,4 +37,4 @@
       (ok (files-match-p output-path
                          (get-test-file-path #P"null-terminated-int-array.bin"))))))
 
-(rove:run-suite :openexr/tests/utils)
+;; (rove:run-suite :openexr/tests/utils)

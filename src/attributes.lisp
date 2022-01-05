@@ -55,7 +55,7 @@
            (attribute-type "" :type (terminated-string 1 :terminator 0))
            (size 0 :type (signed-byte 32))
            (value 0 :type (eval
-                           (case attribute-type
+                           (alexandria:switch (attribute-type :test #'equal)
                              ("int" '(signed-byte 32))
                              ("float" 'single-float)
                              ("double" 'double-float)

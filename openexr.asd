@@ -20,7 +20,9 @@
                :rove)
   :components ((:module "tests"
                 :components
-                ((:file "main")
-                 (:file "utils"))))
+                ((:file "helpers")
+                 (:file "main")
+                 (:file "utils")
+                 (:file "attributes"))))
   :description "Test system for openexr"
   :perform (test-op (op c) (symbol-call :rove :run c)))
