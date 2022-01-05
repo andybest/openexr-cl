@@ -79,9 +79,8 @@
 (defun find-attribute-with-name (name attributes)
   "Search ATTRIBUTES for one with provided NAME. Returns nil if no match"
   (loop for attr across attributes do
-        (when (string= (openexr-header-attribute-name attr) name)
-          (return attr)))
-  nil)
+    (when (string-equal (openexr-header-attribute-name attr) name)
+      (return attr))))
 
 (defun find-data-window (attributes)
   "Searches ATTRIBUTES for the data window"
@@ -92,4 +91,5 @@
   (let ((result (find-data-window attributes)))
     (when (null result)
       (error "OpenEXR file does not contain a data window"))
-    (- (box2i-ymax result) (box2i-ymin result))))
+    (let ((data-window (openexr-header-attribute-value result)))
+      (- (box2i-ymax data-window) (box2i-ymin data-window)))))

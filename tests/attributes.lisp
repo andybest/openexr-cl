@@ -7,7 +7,6 @@
    :rove))
 (in-package :openexr/tests/attributes)
 
-
 (defbinary attribute-array (:export t :byte-order :little-endian)
            (attributes nil :type (custom
                                   :reader (lambda (stream)
@@ -74,6 +73,33 @@
       (ok (files-match-p output-path
                          (get-test-file-path #P"attribute-array.bin"))))))
 
+(deftest test-find-attribute-with-name
+  (with-open-binary-file (in (get-test-file-path #P"attribute-array.bin") :direction :input)
+    (let* ((attributes-binary (read-binary 'attribute-array in))
+           (attributes (attribute-array-attributes attributes-binary)))
+      (testing "expect to be able to find the correct attribute if it exists"
+        (let ((result (find-attribute-with-name "lineOrder" attributes)))
+          (ok (not (null result)))
+          (ok (string-equal (openexr-header-attribute-name result) "lineOrder"))))
+      (testing "expect nil when trying to find non-existing attribute"
+        (ok (null (find-attribute-with-name "foo" attributes)))))))
 
+
+(deftest test-find-data-window
+  (with-open-binary-file (in (get-test-file-path #P"attribute-array.bin") :direction :input)
+    (let* ((attributes-binary (read-binary 'attribute-array in))
+           (attributes (attribute-array-attributes attributes-binary)))
+      (testing "expect to be able to find the dataWindow attribute"
+        (let ((result (find-data-window attributes)))
+          (ok (not (null result)))
+          (ok (string-equal (openexr-header-attribute-name result) "dataWindow")))))))
+
+(deftest test-get-number-of-lines
+  (with-open-binary-file (in (get-test-file-path #P"attribute-array.bin") :direction :input)
+    (let* ((attributes-binary (read-binary 'attribute-array in))
+           (attributes (attribute-array-attributes attributes-binary)))
+      (testing "expect to be able to extract the number of lines from the attributes"
+        (let ((result (get-number-of-lines attributes)))
+          (ok (= result 2)))))))
 
 (rove:run-suite :openexr/tests/attributes)
