@@ -35,13 +35,15 @@
 (deftest test-write-null-terminated-array
   (testing "expect array of non-zero ints to be written correctly"
     (let ((output-path #P"/tmp/openexr-test.bin"))
-      (with-open-binary-file (out output-path :direction :output :if-exists :overwrite)
+      (with-open-binary-file (out output-path :direction :output
+                                              :if-exists :overwrite
+                                              :if-does-not-exist :create)
         (let ((count (write-null-terminated-array (vector (make-int-test-binary :item #x12345678)
                                                           (make-int-test-binary :item #x89ABCDEF))
                                                   'int-test-binary
                                                   out)))
-          (ok (= count 9))
-          (ok (files-match-p output-path
-                             (get-test-file-path #P"null-terminated-int-array.bin"))))))))
+          (ok (= count 9))))
+      (ok (files-match-p output-path
+                         (get-test-file-path #P"null-terminated-int-array.bin"))))))
 
 (rove:run-suite :openexr/tests/utils)
