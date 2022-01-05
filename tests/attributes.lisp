@@ -84,7 +84,6 @@
       (testing "expect nil when trying to find non-existing attribute"
         (ok (null (find-attribute-with-name "foo" attributes)))))))
 
-
 (deftest test-find-data-window
   (with-open-binary-file (in (get-test-file-path #P"attribute-array.bin") :direction :input)
     (let* ((attributes-binary (read-binary 'attribute-array in))

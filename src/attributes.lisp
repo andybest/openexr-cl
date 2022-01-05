@@ -65,10 +65,7 @@
                              ("v2f" 'v2f)
                              ("chlist" '(custom
                                          :reader (lambda (stream)
-                                                   (multiple-value-bind (stream read-size)
-                                                       (read-null-terminated-array 'channel-layout stream)
-                                                     (setf size read-size)
-                                                     (values stream read-size)))
+                                                       (read-null-terminated-array 'channel-layout stream))
                                          :writer (lambda (obj stream)
                                                    (write-null-terminated-array obj 'channel-layout stream))))
                              ("compression" 'compression-type)
